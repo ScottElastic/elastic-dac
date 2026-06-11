@@ -1,0 +1,36 @@
+[metadata]
+creation_date = "2026/06/11"
+maturity = "production"
+updated_date = "2026/06/11"
+
+[rule]
+author = ["Scott Holt"]
+description = "Outbound Connection to Known Malicious IP (Tor Exit Node)"
+from = "now-9m"
+index = ["logs-*"]
+language = "kuery"
+license = "Elastic License v2"
+name = "Outbound Connection to Known Malicious IP (Tor Exit Node)"
+risk_score = 90
+rule_id = "b4cde1de-3000-4081-b4f8-2401c1fa4860"
+severity = "critical"
+tags = ["C2", "Threat Intel"]
+timestamp_override = "event.ingested"
+type = "query"
+
+query = '''
+destination.ip: "185.220.101.42" and event.action: ("allowed" or "established" or "detected")
+'''
+
+[[rule.threat]]
+framework = "MITRE ATT&CK"
+
+[[rule.threat.technique]]
+id = "T1071"
+name = "Application Layer Protocol"
+reference = "https://attack.mitre.org/techniques/T1071/"
+
+[rule.threat.tactic]
+id = "TA0011"
+name = "Command and Control"
+reference = "https://attack.mitre.org/tactics/TA0011/"

@@ -1,0 +1,4 @@
+.detection-rules-cfg.json
+__pycache__/
+*.ndjson
+.env

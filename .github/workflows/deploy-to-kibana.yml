@@ -1,0 +1,50 @@
+name: Deploy Rules to Kibana
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "custom-rules/rules/**"
+      - "custom-rules/exceptions/**"
+  workflow_dispatch: {}
+
+env:
+  CUSTOM_RULES_DIR: ${{ github.workspace }}/custom-rules
+  DETECTION_RULES_REF: main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production   # gate behind a GitHub environment for approvals
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Checkout elastic/detection-rules
+        uses: actions/checkout@v4
+        with:
+          repository: elastic/detection-rules
+          ref: ${{ env.DETECTION_RULES_REF }}
+          path: detection-rules
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install detection-rules CLI
+        working-directory: detection-rules
+        run: pip install .
+
+      - name: Import rules into Kibana (overwrite existing)
+        working-directory: detection-rules
+        run: |
+          python -m detection_rules kibana \
+            --kibana-url "${{ secrets.KIBANA_URL }}" \
+            --api-key "${{ secrets.KIBANA_API_KEY }}" \
+            --space "${{ vars.KIBANA_SPACE || 'default' }}" \
+            import-rules \
+            -d "$CUSTOM_RULES_DIR/rules" \
+            --overwrite \
+            --overwrite-exceptions

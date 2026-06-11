@@ -1,0 +1,67 @@
+name: Sync Rules from Kibana
+
+# Pulls custom rules from Kibana and opens a PR if anything drifted.
+# Run manually or on the nightly schedule. This keeps VCS authoritative
+# while still capturing rules created/edited in the Kibana UI.
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 6 * * *"   # nightly, 06:00 UTC
+
+env:
+  CUSTOM_RULES_DIR: ${{ github.workspace }}/custom-rules
+  DETECTION_RULES_REF: main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Checkout elastic/detection-rules
+        uses: actions/checkout@v4
+        with:
+          repository: elastic/detection-rules
+          ref: ${{ env.DETECTION_RULES_REF }}
+          path: detection-rules
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install detection-rules CLI
+        working-directory: detection-rules
+        run: pip install .
+
+      - name: Export custom rules from Kibana
+        working-directory: detection-rules
+        run: |
+          python -m detection_rules kibana \
+            --kibana-url "${{ secrets.KIBANA_URL }}" \
+            --api-key "${{ secrets.KIBANA_API_KEY }}" \
+            --space "${{ vars.KIBANA_SPACE || 'default' }}" \
+            export-rules \
+            -d "$CUSTOM_RULES_DIR/rules" \
+            -ed "$CUSTOM_RULES_DIR/exceptions" \
+            --custom-rules-only \
+            --export-exceptions \
+            --local-creation-date \
+            --skip-errors
+
+      - name: Open PR with any drift
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: sync/kibana-export
+          title: "chore: sync custom rules from Kibana"
+          commit-message: "chore: sync custom rules from Kibana"
+          body: |
+            Automated export of custom rules from Kibana.
+            Review the diff — anything here was changed in the Kibana UI
+            and is not yet reflected in version control.

@@ -1,0 +1,43 @@
+name: Validate Rules (PR)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "custom-rules/**"
+
+env:
+  CUSTOM_RULES_DIR: ${{ github.workspace }}/custom-rules
+  DETECTION_RULES_REF: main   # pin to a tag/SHA for reproducible builds
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Checkout elastic/detection-rules
+        uses: actions/checkout@v4
+        with:
+          repository: elastic/detection-rules
+          ref: ${{ env.DETECTION_RULES_REF }}
+          path: detection-rules
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install detection-rules CLI
+        working-directory: detection-rules
+        run: pip install ".[dev]"
+
+      - name: Validate all custom rules (schema + query semantics)
+        working-directory: detection-rules
+        run: python -m detection_rules validate-all
+
+      - name: Run unit tests against custom rules
+        working-directory: detection-rules
+        run: python -m detection_rules test
