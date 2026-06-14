@@ -1,0 +1,72 @@
+[metadata]
+creation_date = "2026/06/14"
+integration = []
+maturity = "development"
+updated_date = "2026/06/14"
+
+[rule]
+actions = []
+author = ["40064842"]
+description = """
+Detects outbound C2 beacon communication to known Tor exit node 185.220.101.42 from GLOBEX endpoints. This rule triggers
+the Sumo Logic cross-platform investigation workflow.
+"""
+enabled = true
+exceptions_list = []
+false_positives = []
+filters = []
+from = "now-2401m"
+index = ["logs-*", "filebeat-*"]
+interval = "1m"
+language = "kuery"
+license = ""
+max_signals = 100
+name = "C2 Beacon to Known Tor Exit Node \u2014 GLOBEX"
+references = []
+related_integrations = []
+required_fields = []
+revision = 1
+risk_score = 95
+risk_score_mapping = []
+rule_id = "97ecd142-6b38-4002-862c-5eec81f91348"
+setup = ""
+severity = "critical"
+severity_mapping = []
+tags = ["C2", "Exfiltration", "Sumo Logic Enrichment", "GLOBEX Demo"]
+to = "now"
+type = "query"
+version = 1
+
+query = '''
+event.action: "c2_beacon" AND destination.ip: "185.220.101.42"
+'''
+
+
+[[rule.threat]]
+framework = "MITRE ATT&CK"
+[[rule.threat.technique]]
+id = "T1071"
+name = "Application Layer Protocol"
+reference = "https://attack.mitre.org/techniques/T1071/"
+
+
+[rule.threat.tactic]
+id = "TA0011"
+name = "Command and Control"
+reference = "https://attack.mitre.org/tactics/TA0011/"
+[[rule.threat]]
+framework = "MITRE ATT&CK"
+[[rule.threat.technique]]
+id = "T1041"
+name = "Exfiltration Over C2 Channel"
+reference = "https://attack.mitre.org/techniques/T1041/"
+
+
+[rule.threat.tactic]
+id = "TA0010"
+name = "Exfiltration"
+reference = "https://attack.mitre.org/tactics/TA0010/"
+
+[rule.meta]
+kibana_siem_app_url = ""
+
