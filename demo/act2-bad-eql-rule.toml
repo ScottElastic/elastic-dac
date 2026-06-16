@@ -1,0 +1,48 @@
+[metadata]
+creation_date = "2026/06/16"
+maturity = "production"
+updated_date = "2026/06/16"
+
+[rule]
+author = ["Scott Holt"]
+description = """
+Detects process hollowing via remote thread injection: a process creates a suspended child,
+unmaps its memory, writes a new image, then resumes the thread. Common technique used by
+infostealers and RATs to blend malicious code into legitimate process names.
+"""
+from = "now-9m"
+index = ["logs-*"]
+language = "eql"
+license = "Elastic License v2"
+name = "Suspicious Process Hollowing via Remote Thread Injection"
+risk_score = 95
+rule_id = "cbbe19ab-b747-4476-a058-9807aec5af19"
+severity = "super-critical"
+tags = ["Defense Evasion", "Process Injection", "GLOBEX Demo"]
+timestamp_override = "event.ingested"
+type = "eql"
+
+query = '''
+sequence by host.id, process.parent.entity_id with maxspan=30s
+  [process where event.action == "start" and process.args : "--suspended"]
+  [process where event.action == "access" and
+   process.Ext.memory_region.protection : ("RWX", "RX")]
+'''
+
+[[rule.threat]]
+framework = "MITRE ATT&CK"
+
+[[rule.threat.technique]]
+id = "T1055"
+name = "Process Injection"
+reference = "https://attack.mitre.org/techniques/T1055/"
+
+[[rule.threat.technique.subtechnique]]
+id = "T1055.012"
+name = "Process Hollowing"
+reference = "https://attack.mitre.org/techniques/T1055/012/"
+
+[rule.threat.tactic]
+id = "TA0005"
+name = "Defense Evasion"
+reference = "https://attack.mitre.org/tactics/TA0005/"

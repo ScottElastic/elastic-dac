@@ -1,0 +1,58 @@
+[metadata]
+creation_date = "2026/06/16"
+maturity = "production"
+updated_date = "2026/06/16"
+
+[rule]
+author = ["Scott Holt"]
+description = """
+Detects the GhostLoader ransomware pre-encryption staging chain: bcdedit.exe disabling
+Windows recovery followed by vssadmin or wmic deleting Volume Shadow Copies on the same
+host within 2 minutes. This two-step sequence was observed in >95% of confirmed GhostLoader
+intrusions. If this fires, ransomware encryption payload execution is likely imminent.
+"""
+from = "now-9m"
+index = ["logs-*"]
+language = "eql"
+license = "Elastic License v2"
+name = "GhostLoader Ransomware Staging — Recovery Disabled then Shadow Copies Deleted"
+risk_score = 99
+rule_id = "5fa3d58b-21a6-4be1-86c6-2ea07f124ab8"
+severity = "critical"
+tags = ["Ransomware", "GhostLoader", "Impact", "GLOBEX Demo", "Little Pharma"]
+timestamp_override = "event.ingested"
+type = "eql"
+
+query = '''
+sequence by host.id with maxspan=2m
+  [process where process.name : "bcdedit.exe" and
+   process.args : ("*recoveryenabled*", "*bootstatuspolicy*")]
+  [process where process.name : ("vssadmin.exe", "wmic.exe") and
+   process.args : ("*delete*", "*shadow*")]
+'''
+
+[[rule.threat]]
+framework = "MITRE ATT&CK"
+
+[[rule.threat.technique]]
+id = "T1490"
+name = "Inhibit System Recovery"
+reference = "https://attack.mitre.org/techniques/T1490/"
+
+[rule.threat.tactic]
+id = "TA0040"
+name = "Impact"
+reference = "https://attack.mitre.org/tactics/TA0040/"
+
+[[rule.threat]]
+framework = "MITRE ATT&CK"
+
+[[rule.threat.technique]]
+id = "T1486"
+name = "Data Encrypted for Impact"
+reference = "https://attack.mitre.org/techniques/T1486/"
+
+[rule.threat.tactic]
+id = "TA0040"
+name = "Impact"
+reference = "https://attack.mitre.org/tactics/TA0040/"
