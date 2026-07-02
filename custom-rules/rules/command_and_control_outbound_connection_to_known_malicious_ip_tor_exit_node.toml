@@ -1,0 +1,62 @@
+[metadata]
+creation_date = "2026/07/02"
+integration = []
+maturity = "development"
+updated_date = "2026/07/02"
+
+[rule]
+actions = []
+author = ["40064842"]
+data_view_id = "9522765f-1681-4a89-822a-2bff7a2f7484"
+description = "Outbound Connection to Known Malicious IP (Tor Exit Node)"
+enabled = true
+exceptions_list = []
+false_positives = []
+filters = []
+from = "now-144005m"
+interval = "5m"
+language = "kuery"
+license = ""
+max_signals = 100
+name = "Outbound Connection to Known Malicious IP (Tor Exit Node)"
+references = []
+related_integrations = []
+required_fields = []
+revision = 2
+risk_score = 90
+risk_score_mapping = []
+rule_id = "f7efe331-5d06-48c2-8416-0262c1bbe6ac"
+setup = ""
+severity = "critical"
+severity_mapping = []
+tags = []
+to = "now"
+type = "query"
+version = 1
+
+query = '''
+destination.ip: "185.220.101.42" and event.action: ("allowed" or "established" or "detected")
+'''
+
+
+[[rule.threat]]
+framework = "MITRE ATT&CK"
+[[rule.threat.technique]]
+id = "T1071"
+name = "Application Layer Protocol"
+reference = "https://attack.mitre.org/techniques/T1071/"
+[[rule.threat.technique.subtechnique]]
+id = "T1071.001"
+name = "Web Protocols"
+reference = "https://attack.mitre.org/techniques/T1071/001/"
+
+
+
+[rule.threat.tactic]
+id = "TA0011"
+name = "Command and Control"
+reference = "https://attack.mitre.org/tactics/TA0011/"
+
+[rule.meta]
+kibana_siem_app_url = "https://splunk-query-ed242f.kb.us-west2.gcp.elastic-cloud.com/app/security"
+
