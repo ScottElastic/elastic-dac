@@ -1,0 +1,75 @@
+[metadata]
+creation_date = "2026/07/02"
+integration = []
+maturity = "development"
+updated_date = "2026/07/02"
+
+[rule]
+actions = []
+author = ["Scott Holt"]
+description = "Detects chmod permissions with process args 777"
+enabled = false
+exceptions_list = []
+false_positives = []
+from = "now-9m"
+index = ["logs-*"]
+interval = "5m"
+language = "kuery"
+license = "Elastic License v2"
+max_signals = 100
+name = "Suspicious chmod 777"
+references = []
+related_integrations = []
+revision = 0
+risk_score = 21
+risk_score_mapping = []
+rule_id = "90231cea-3cf1-446c-b5bd-344d776e4f46"
+setup = ""
+severity = "low"
+severity_mapping = []
+tags = ["OS: Linux", "Defense Evasion"]
+timestamp_override = "event.ingested"
+to = "now"
+type = "query"
+version = 1
+
+query = '''
+process.name: "chmod" and process.args : "777"
+'''
+
+
+[[rule.required_fields]]
+ecs = true
+name = "process.args"
+type = "keyword"
+
+[[rule.required_fields]]
+ecs = true
+name = "process.name"
+type = "keyword"
+
+[[rule.threat]]
+framework = "MITRE ATT&CK"
+[[rule.threat.technique]]
+id = "T1222"
+name = "File and Directory Permissions Modification"
+reference = "https://attack.mitre.org/techniques/T1222/"
+
+
+[rule.threat.tactic]
+id = "TA0005"
+name = "Defense Evasion"
+reference = "https://attack.mitre.org/tactics/TA0005/"
+[[rule.threat]]
+framework = "MITRE ATT&CK"
+[[rule.threat.technique]]
+id = "T1059"
+name = "Command and Scripting Interpreter"
+reference = "https://attack.mitre.org/techniques/T1059/"
+
+
+[rule.threat.tactic]
+id = "TA0002"
+name = "Execution"
+reference = "https://attack.mitre.org/tactics/TA0002/"
+
